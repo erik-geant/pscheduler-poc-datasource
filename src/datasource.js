@@ -3,7 +3,6 @@ import _ from "lodash";
 export class GenericDatasource {
 
   constructor(instanceSettings, $q, backendSrv, templateSrv) {
-    this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
     this.q = $q;
