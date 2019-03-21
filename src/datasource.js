@@ -115,6 +115,8 @@ export class GenericDatasource {
         parameters: task_data
     };
 
+    console.log('get_measurement_results: ' + JSON.stringify(task_data))
+
     var backend_request = {
         withCredentials: this.withCredentials,
         headers: this.headers,
@@ -176,7 +178,7 @@ export class GenericDatasource {
              type: 'table'
          }
 
-         console.log('data: ' + JSON.stringify(data));
+         // console.log('data: ' + JSON.stringify(data));
          
          return {
              _request: test_parameters,
