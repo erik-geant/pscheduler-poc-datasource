@@ -15,133 +15,140 @@ export class GenericDatasource {
     }
   }
 
-  query(options) {
-    var query = this.buildQueryParameters(options);
-    query.targets = query.targets.filter(t => !t.hide);
+  testDatasource() {
+    var url = this.url + '/json-proxy/connection-test';
+    var backend_request = {
+        withCredentials: this.withCredentials,
+        headers: this.headers,
+        url: url,
+        method: 'GET'
+    };
+    console.log('testDatasource: ' + JSON.stringify(backend_request));
 
-    if (query.targets.length <= 0) {
-      return this.q.when({data: []});
-    }
-
-    if (this.templateSrv.getAdhocFilters) {
-      query.adhocFilters = this.templateSrv.getAdhocFilters(this.name);
-    } else {
-      query.adhocFilters = [];
-    }
-
-    return this.doRequest({
-      url: this.url + '/query',
-      data: query,
-      method: 'POST'
-    });
+    return this.backendSrv.datasourceRequest(backend_request).then(
+        r => {
+          if (r.status === 200) {
+            return {
+              status: "success",
+              message: "Data source is working",
+              title: "Success"
+            };
+          }
+        }
+    );
   }
 
-  testDatasource() {
-    return this.doRequest({
-      url: this.url + '/',
-      method: 'GET',
-    }).then(response => {
-      if (response.status === 200) {
-        return { status: "success", message: "Data source is working", title: "Success" };
-      }
+  make_latency_test_params(source, destination) {
+    var _test_spec = {
+        'source': source,
+        'dest': destination,
+        'output-raw': true,
+        'schema': 1
+    };
+
+    return {
+        'schema': 1,
+        'schedule': {'slip': 'PT5M'},
+        'test': {
+            'spec': _test_spec,
+            'type': 'latency'
+        }
+    }
+  }
+
+  get_measurement_result(mp_hostname, task_data) {
+
+    var payload = {
+        'mp-hostname': mp_hostname,
+        'task-data': task_data
+    };
+
+    var backend_request = {
+        withCredentials: this.withCredentials,
+        headers: this.headers,
+        url: this.url + '/json-proxy/run-measurement',
+        method: 'POST',
+        data: payload
+    };
+
+    return this.backendSrv.datasourceRequest(backend_request).then(
+        r => {
+            return {
+                _request: payload,
+                response: r.data
+            }
+        }
+        
+    );
+  }
+
+  query(options) {
+
+    var targets = options.targets.filter(t => !t.hide);
+
+    var source = 'psmall-b-3.basnet.by';
+    var destination = 'psmall-b-2.basnet.by';
+    var test_parameters = this.make_latency_test_params(source, destination);
+
+    if (targets === undefined || targets.length == 0) {
+        return new Promise( (res, rej) => {
+            return res({
+                _request: { data: test_parameters},
+                data: []
+            });
+        });
+    }
+
+    var result_promise = this.get_measurement_result(source, test_parameters)
+
+    return result_promise.then(r => {
+
+         var columns = [
+             {text: 'src-ts', type: 'integer'},
+             {text: 'dst-ts', type: 'integer'},
+             {text: 'delta', type: 'integer'}
+         ];
+
+         var rows = _.map(r.response['raw-packets'], p => {
+             return [
+                 p['src-ts'],
+                 p['dst-ts'],
+                 p['dst-ts']-p['src-s']
+             ];
+         });
+
+         var data = {
+             columns: columns,
+             rows: rows,
+             type: 'table'
+         }
+
+         console.log('data: ' + JSON.stringify(data));
+         
+         return {
+             _request: r._request,
+             data: [data]
+         };
     });
   }
 
   annotationQuery(options) {
-    var query = this.templateSrv.replace(options.annotation.query, {}, 'glob');
-    var annotationQuery = {
-      range: options.range,
-      annotation: {
-        name: options.annotation.name,
-        datasource: options.annotation.datasource,
-        enable: options.annotation.enable,
-        iconColor: options.annotation.iconColor,
-        query: query
-      },
-      rangeRaw: options.rangeRaw
-    };
-
-    return this.doRequest({
-      url: this.url + '/annotations',
-      method: 'POST',
-      data: annotationQuery
-    }).then(result => {
-      return result.data;
-    });
+    return Promise.resolve([]);
   }
 
   metricFindQuery(query) {
-    var interpolated = {
-        target: this.templateSrv.replace(query, null, 'regex')
-    };
-
-    return this.doRequest({
-      url: this.url + '/search',
-      data: interpolated,
-      method: 'POST',
-    }).then(this.mapToTextValue);
-  }
-
-  mapToTextValue(result) {
-    return _.map(result.data, (d, i) => {
-      if (d && d.text && d.value) {
-        return { text: d.text, value: d.value };
-      } else if (_.isObject(d)) {
-        return { text: d, value: i};
-      }
-      return { text: d, value: d };
-    });
-  }
-
-  doRequest(options) {
-    options.withCredentials = this.withCredentials;
-    options.headers = this.headers;
-
-    return this.backendSrv.datasourceRequest(options);
-  }
-
-  buildQueryParameters(options) {
-    //remove placeholder targets
-    options.targets = _.filter(options.targets, target => {
-      return target.target !== 'select metric';
-    });
-
-    var targets = _.map(options.targets, target => {
-      return {
-        target: this.templateSrv.replace(target.target, options.scopedVars, 'regex'),
-        refId: target.refId,
-        hide: target.hide,
-        type: target.type || 'timeserie'
-      };
-    });
-
-    options.targets = targets;
-
-    return options;
+    return new Promise.resolve(
+        [
+            {text: 'm1', value: 'v1'},
+            {text: 'm2', value: 'v2'}
+        ]);
   }
 
   getTagKeys(options) {
-    return new Promise((resolve, reject) => {
-      this.doRequest({
-        url: this.url + '/tag-keys',
-        method: 'POST',
-        data: options
-      }).then(result => {
-        return resolve(result.data);
-      });
-    });
+    return Promise.resolve([]);
   }
 
   getTagValues(options) {
-    return new Promise((resolve, reject) => {
-      this.doRequest({
-        url: this.url + '/tag-values',
-        method: 'POST',
-        data: options
-      }).then(result => {
-        return resolve(result.data);
-      });
-    });
+    return Promise.resolve([]);
   }
-
 }
