@@ -137,7 +137,7 @@ export class GenericDatasource {
   }
 
   metricFindQuery(query) {
-    return new Promise.resolve(
+    return Promise.resolve(
         [
             {text: 'm1', value: 'v1'},
             {text: 'm2', value: 'v2'}
