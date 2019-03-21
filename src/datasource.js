@@ -56,29 +56,82 @@ export class GenericDatasource {
     }
   }
 
+  delay(t) {
+    return new Promise(function(res, rej) {
+        setTimeout(function() { res(); }, t);
+    });
+  }
+
+  loop_until_finished(status_url, ds) {
+    
+    console.log('getting status from ' + status_url);
+
+    var backend_request = {
+        withCredentials: ds.withCredentials,
+        headers: ds.headers,
+        url: ds.url + '/json-proxy/get',
+        method: 'POST',
+        data: {url: status_url + '/runs/first'} 
+    };
+
+
+    return ds.delay(5000).then(function() {
+        return ds.backendSrv.datasourceRequest(backend_request).then(
+          r => {
+            if (r.status !== 200) {
+              return 'bad status: '  + r.status;
+            }
+ 
+            console.log('got task state: ' + r.data.state); 
+            if (!_.includes(['pending', 'on-deck', 'running', 'finished'], r.data.state)) {
+              console.log('unusual task state');
+            }
+  
+            if (r.data.state != 'finished') {
+              return ds.loop_until_finished(status_url, ds);
+            }
+
+            if (r.data.hasOwnProperty('result')) {
+                console.log('response has "result"');
+                return r.data.result;
+            }
+
+            if (r.data.hasOwnProperty('result-merged')) {
+                consoled.log('response has "result-merged"');
+                return r.data['result-merged'];
+            }
+
+            console.log("can't find result key in response: " + JSON.stringify(r.data));
+            return "can't find result key in response"
+         }
+       );
+    });
+  }
+  
   get_measurement_result(mp_hostname, task_data) {
 
     var payload = {
-        'mp-hostname': mp_hostname,
-        'task-data': task_data
+        url: 'https://' + mp_hostname + '/pscheduler/tasks',
+        parameters: task_data
     };
 
     var backend_request = {
         withCredentials: this.withCredentials,
         headers: this.headers,
-        url: this.url + '/json-proxy/run-measurement',
+        url: this.url + '/json-proxy/post',
         method: 'POST',
         data: payload
     };
 
     return this.backendSrv.datasourceRequest(backend_request).then(
         r => {
-            return {
-                _request: payload,
-                response: r.data
+            if (r.status === 200) {
+                return this.loop_until_finished(r.data, this);
+            } else {
+                console.log('error, got status: ' + r.status);
+                return 'bad request';
             }
         }
-        
     );
   }
 
@@ -109,7 +162,7 @@ export class GenericDatasource {
              {text: 'delta', type: 'integer'}
          ];
 
-         var rows = _.map(r.response['raw-packets'], p => {
+         var rows = _.map(r['raw-packets'], p => {
              return [
                  p['src-ts'],
                  p['dst-ts'],
@@ -126,29 +179,36 @@ export class GenericDatasource {
          console.log('data: ' + JSON.stringify(data));
          
          return {
-             _request: r._request,
+             _request: test_parameters,
              data: [data]
          };
     });
   }
 
   annotationQuery(options) {
-    return Promise.resolve([]);
+    return [];
   }
 
   metricFindQuery(query) {
+/*
     return Promise.resolve(
         [
             {text: 'm1', value: 'v1'},
             {text: 'm2', value: 'v2'}
         ]);
+*/
+
+    return [
+        {text: 'm1', value: 'v1'},
+        {text: 'm2', value: 'v2'}
+    ];
   }
 
   getTagKeys(options) {
-    return Promise.resolve([]);
+    return [];
   }
 
   getTagValues(options) {
-    return Promise.resolve([]);
+    return [];
   }
 }
