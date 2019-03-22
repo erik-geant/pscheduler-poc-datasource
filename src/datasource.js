@@ -43,7 +43,8 @@ export class GenericDatasource {
         'source': source,
         'dest': destination,
         'output-raw': true,
-        'schema': 1
+        'schema': 1,
+        'packet-count': 250
     };
 
     return {
@@ -178,7 +179,7 @@ export class GenericDatasource {
              type: 'table'
          }
 
-         // console.log('data: ' + JSON.stringify(data));
+         console.log('data: ' + JSON.stringify(data));
          
          return {
              _request: test_parameters,
