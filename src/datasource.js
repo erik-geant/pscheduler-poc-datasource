@@ -169,7 +169,7 @@ export class GenericDatasource {
              return [
                  p['src-ts'],
                  p['dst-ts'],
-                 p['dst-ts']-p['src-s']
+                 p['dst-ts']-p['src-ts']
              ];
          });
 
