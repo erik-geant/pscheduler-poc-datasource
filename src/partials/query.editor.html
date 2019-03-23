@@ -1,25 +1,125 @@
-<query-editor-row query-ctrl="ctrl" class="generic-datasource-query-row" has-text-edit-mode="true">
+<query-editor-row
+    query-ctrl="ctrl"
+    class="generic-datasource-query-row"
+    has-text-edit-mode="true">
   <div class="gf-form-inline">
-    <div class="gf-form max-width-8">
-      <select class="gf-form-input" ng-model="ctrl.target.type" ng-options="f as f for f in ['table', 'timeserie']"></select>
+
+    <div class="gf-form">
+      <select class="gf-form-input"
+        ng-model="ctrl.target.test_type"
+        ng-options="t as t for t in ['latency', 'throughput']">
+      </select>
     </div>
 
-    <div class="gf-form" ng-if="ctrl.target.rawQuery">
-      <textarea class="gf-form-input" rows="5" ng-model="ctrl.target.target" spellcheck="false" ng-blur="ctrl.onChangeInternal()" />
-    </div>
 
-    <div ng-if="!ctrl.target.rawQuery">
-      <div class="gf-form">
-        <gf-form-dropdown model="ctrl.target.target"
-          allow-custom="true"
-          lookup-text="true"
-          get-options="ctrl.getOptions($query)"
-          on-change="ctrl.onChangeInternal()">
-      </gf-form-dropdown>
+    <div ng-if="ctrl.target.test_type == 'latency'">
+      <div class="section gf-form-group">
+
+        <div class="gf-form">
+          <label class="gf-form-label">packet count</label>
+          <gf-form-dropdown model="ctrl.target.packet_count"
+            allow-custom="true"
+            lookup-text="false"
+            get-options="ctrl.getOptions('latency', 'packet-count')"
+            on-change="ctrl.onChangeInternal()">
+          </gf-form-dropdown>
+        </div>
+  
+        <div class="gf-form">
+          <label class="gf-form-label">packet interval</label>
+          <gf-form-dropdown model="ctrl.target.packet_interval"
+            allow-custom="true"
+            lookup-text="false"
+            get-options="ctrl.getOptions('latency', 'packet-interval')"
+            on-change="ctrl.onChangeInternal()">
+          </gf-form-dropdown>
+        </div>
+        
+        <div class="gf-form">
+          <label class="gf-form-label">packet timeout</label>
+          <gf-form-dropdown model="ctrl.target.packet_timeout"
+            allow-custom="true"
+            lookup-text="false"
+            get-options="ctrl.getOptions('latency', 'packet-timeout')"
+            on-change="ctrl.onChangeInternal()">
+          </gf-form-dropdown>
+        </div>
+        
+        <div class="gf-form">
+          <label class="gf-form-label">ip version</label>
+          <gf-form-dropdown model="ctrl.target.ip_version"
+            allow-custom="false"
+            lookup-text="false"
+            get-options="ctrl.getOptions('latency', 'ip-version')"
+            on-change="ctrl.onChangeInternal()">
+          </gf-form-dropdown>
+        </div>
+
       </div>
     </div>
+
+
+    <div ng-if="ctrl.target.test_type == 'throughput'">
+      <div class="section gf-form-group">
+ 
+        <div class="gf-form">
+          <label class="gf-form-label">duration</label>
+          <gf-form-dropdown model="ctrl.target.duration"
+            allow-custom="true"
+            lookup-text="false"
+            get-options="ctrl.getOptions('throughput', 'duration')"
+            on-change="ctrl.onChangeInternal()">
+          </gf-form-dropdown>
+        </div>
+
+        <div class="gf-form">
+          <label class="gf-form-label">ip version</label>
+          <gf-form-dropdown model="ctrl.target.ip_version"
+            allow-custom="false"
+            lookup-text="false"
+            get-options="ctrl.getOptions('throughput', 'ip-version')"
+            on-change="ctrl.onChangeInternal()">
+          </gf-form-dropdown>
+        </div>
+
+      </div> 
+    </div>
+<!--
+
+    # throughput params
+    "duration": "",
+    "interval": "",
+    "tos": "",
+    "protocol": "",
+    "address_type": "",
+    "tcp_window": "",
+    "udp_buffer": "",
+    "max_bandwidth": "",
+
+<div class="gf-form max-width-8"
+<select class="gf-form-input" ng-model="ctrl.target.type" ng-options="f as f for f in ['table', 'timeserie']"></select>
+</div>
+
+<div class="gf-form" ng-if="ctrl.target.rawQuery">
+<textarea class="gf-form-input" rows="5" ng-model="ctrl.target.target" spellcheck="false" ng-blur="ctrl.onChangeInternal()" />
+</div>
+
+<div ng-if="!ctrl.target.rawQuery">
+<div class="gf-form">
+<gf-form-dropdown model="ctrl.target.target"
+allow-custom="true"
+lookup-text="true"
+get-options="ctrl.getOptions($query)"
+on-change="ctrl.onChangeInternal()">
+</gf-form-dropdown>
+</div>
+</div>
+-->
+
     <div class="gf-form gf-form--grow">
       <div class="gf-form-label gf-form-label--grow"></div>
     </div>
+  
   </div>
 </query-editor-row>
+

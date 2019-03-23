@@ -193,6 +193,7 @@ export class GenericDatasource {
   }
 
   metricFindQuery(query) {
+    console.log('metricFindQuery: IS THIS METHOD EVER CALLED?');
 /*
     return Promise.resolve(
         [
