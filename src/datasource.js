@@ -38,21 +38,13 @@ export class GenericDatasource {
     );
   }
 
-  make_latency_test_params(source, destination) {
-    var _test_spec = {
-        'source': source,
-        'dest': destination,
-        'output-raw': true,
-        'schema': 1,
-        'packet-count': 250
-    };
-
+  make_latency_test_params(target) {
     return {
         'schema': 1,
         'schedule': {'slip': 'PT5M'},
         'test': {
-            'spec': _test_spec,
-            'type': 'latency'
+            'spec': target.test_spec,
+            'type': target.test_type
         }
     }
   }
@@ -142,9 +134,6 @@ export class GenericDatasource {
 
     var targets = options.targets.filter(t => !t.hide);
 
-    var source = 'psmall-b-3.basnet.by';
-    var destination = 'psmall-b-2.basnet.by';
-    var test_parameters = this.make_latency_test_params(source, destination);
 
     if (targets === undefined || targets.length == 0) {
         return new Promise( (res, rej) => {
@@ -155,7 +144,11 @@ export class GenericDatasource {
         });
     }
 
-    var result_promise = this.get_measurement_result(source, test_parameters)
+    // just use the first target, as an experiement (for now only)
+
+    var test_parameters = this.make_latency_test_params(targets[0]);
+
+    var result_promise = this.get_measurement_result(targets[0].source, test_parameters)
 
     return result_promise.then(r => {
 

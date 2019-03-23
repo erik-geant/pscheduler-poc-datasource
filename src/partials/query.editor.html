@@ -4,12 +4,45 @@
     has-text-edit-mode="true">
   <div class="gf-form-inline">
 
-    <div class="gf-form">
-      <select class="gf-form-input"
-        ng-model="ctrl.target.test_type"
-        ng-options="t as t for t in ['latency', 'throughput']">
-      </select>
+
+    <div class="section gf-form-group">
+      <div class="gf-form">
+        <label class="gf-form-label">measurement type</label>
+        <gf-form-dropdown model="ctrl.target.test_type"
+          allow-custom="true"
+          lookup-text="false"
+          get-options="ctrl.getOptions('', 'test-type')"
+          on-change="ctrl.onChangeInternal()">
+        </gf-form-dropdown>
+      </div>
     </div>
+
+    <div class="section gf-form-group">
+
+      <div class="gf-form">
+        <label class="gf-form-label">source</label>
+        <gf-form-dropdown model="ctrl.target.source"
+          allow-custom="true"
+          lookup-text="false"
+          get-options="ctrl.getOptions('', 'source')"
+          on-change="ctrl.onChangeInternal()">
+        </gf-form-dropdown>
+      </div>
+
+       <div class="gf-form">
+        <label class="gf-form-label">destination</label>
+        <gf-form-dropdown model="ctrl.target.destination"
+          allow-custom="true"
+          lookup-text="false"
+          get-options="ctrl.getOptions('', 'destination')"
+          on-change="ctrl.onChangeInternal()">
+        </gf-form-dropdown>
+      </div>
+ 
+    </div>
+
+
+
 
 
     <div ng-if="ctrl.target.test_type == 'latency'">

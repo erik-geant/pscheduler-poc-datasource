@@ -8,19 +8,27 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
 
     this.scope = $scope;
 
+    // general test params
     var default_test_type = 'latency'
+    var default_source = 'psmall-b-3.basnet.by';
+    var default_destination = 'psmall-b-2.basnet.by';
+    var default_ip_version = 4;
 
     // owping params
     var default_packet_count = 100;
     var default_packet_interval = .1;
     var default_packet_timeout = 0;
-    var default_ip_version = 4;
 
     // iperf3 params
     var default_duration = 10;
 
+    this.target.source =
+        this.target.source || default_source;
+    this.target.destination =
+        this.target.destination || default_destination;
     this.target.test_type =
         this.target.test_type || default_test_type;
+
     this.target.packet_count =
         this.target.packet_count || default_packet_count;
     this.target.packet_interval =
@@ -33,6 +41,31 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
     this.target.duration =
         this.target.duration || default_duration;
 
+    this.target.test_spec = this.make_test_spec(this.target)
+
+  }
+
+  make_test_spec(t) {
+    var _test_spec = {
+        source: t.source,
+        dest: t.dest,
+        schema: 1 
+    };
+
+    if (t.test_type == 'latency') {
+        _test_spec['output-raw'] = true;
+        _test_spec['ip-version'] = t.ip_version;
+        _test_spec['packet-count'] = t.packet_count;
+        _test_spec['packet-interval'] = t.packet_interval;
+        _test_spec['packet-timeout'] = t.packet_timeout;
+    }
+
+    if (t.test_type == 'throughput') {
+        _test_spec['ip-version'] = t.ip_version;
+        _test_spec['duration'] = t.duration;
+    }
+console.log('test_spec: ' + JSON.stringify(_test_spec)); 
+    return _test_spec;
   }
 
   getOptions(measurement_type, option_name) {
@@ -70,12 +103,28 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
         ];
     }
 
+    if (option_name == 'source' || option_name == 'destination') {
+        $options = [
+            {text: 'psmall-b-3.basnet.by', value: 'psmall-b-3.basnet.by'},
+            {text: 'psmall-b-2.basnet.by', value: 'psmall-b-2.basnet.by'},
+        ];
+    }
+
     if (option_name == 'ip-version') {
         $options = [
             {text: 'ipv4', value: 4},
             {text: 'ipv6', value: 6},
         ];
     }
+
+    if (option_name == 'test-type') {
+        $options = [
+            {text: 'latency', value: 'latency'},
+            {text: 'throughput', value: 'throughput'}
+        ];
+    }
+
+
 
     return $options;
 
@@ -92,6 +141,7 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
   }
 
   onChangeInternal() {
+    this.target.test_spec = this.make_test_spec(this.target);
 //    this.panelCtrl.refresh(); // Asks the panel to refresh data.
   }
 }
