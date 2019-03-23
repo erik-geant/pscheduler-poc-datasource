@@ -3,7 +3,7 @@ import Q from "q";
 
 describe('GenericDatasource', function() {
     var ctx = {};
-
+/*
     beforeEach(function() {
         ctx.$q = Q;
         ctx.backendSrv = {};
@@ -277,5 +277,5 @@ describe('GenericDatasource', function() {
             done();
         });
     });
-
+*/
 });
