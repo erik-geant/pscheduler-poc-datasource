@@ -20,7 +20,7 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
     var default_packet_timeout = 0;
 
     // iperf3 params
-    var default_duration = 10;
+    var default_duration = 'PT10S';
 
     this.target.source =
         this.target.source || default_source;
@@ -97,9 +97,9 @@ console.log('test_spec: ' + JSON.stringify(_test_spec));
 
     if (measurement_type == 'throughput' && option_name == 'duration') {
         $options = [
-            {text: '5', value: 5},
-            {text: '10', value: 10},
-            {text: '30', value: 30}
+            {text: '5s', value: 'PT5S'},
+            {text: '10s', value: 'PT10S'},
+            {text: '30s', value: 'PT30S'}
         ];
     }
 

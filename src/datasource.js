@@ -78,6 +78,7 @@ export class GenericDatasource {
             console.log('got task state: ' + r.data.state); 
             if (!_.includes(['pending', 'on-deck', 'running', 'finished'], r.data.state)) {
               console.log('unusual task state');
+              return 'unhandled task state';
             }
   
             if (r.data.state != 'finished') {
@@ -152,19 +153,42 @@ export class GenericDatasource {
 
     return result_promise.then(r => {
 
-         var columns = [
-             {text: 'src-ts', type: 'integer'},
-             {text: 'dst-ts', type: 'integer'},
-             {text: 'delta', type: 'integer'}
-         ];
+         var columns = [];
+         var rows = [];
+         
+         if (test_parameters.test.type == 'latency') {
+           columns = [
+               {text: 'src-ts', type: 'integer'},
+               {text: 'dst-ts', type: 'integer'},
+               {text: 'delta', type: 'integer'}
+           ];
+  
+           rows = _.map(r['raw-packets'], p => {
+               return [
+                   p['src-ts'],
+                   p['dst-ts'],
+                   p['dst-ts']-p['src-ts']
+               ];
+           });
+         }
 
-         var rows = _.map(r['raw-packets'], p => {
-             return [
-                 p['src-ts'],
-                 p['dst-ts'],
-                 p['dst-ts']-p['src-ts']
-             ];
-         });
+         if (test_parameters.test.type == 'throughput') {
+            columns = [
+               {text: 'start', type: 'number'},
+               {text: 'end', type: 'end'},
+               {text: 'retransmits', type: 'integer'},
+               {text: 'bytes', type: 'integer'}
+            ]
+            
+            rows = _.map(r['intervals'], p => {
+                return [
+                    p.summary.start,
+                    p.summary.end,
+                    p.summary.retransmits,
+                    p.summary['throughput-bytes']
+                ];
+            });
+         }
 
          var data = {
              columns: columns,
