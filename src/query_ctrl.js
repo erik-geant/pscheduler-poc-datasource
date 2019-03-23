@@ -48,7 +48,7 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
   make_test_spec(t) {
     var _test_spec = {
         source: t.source,
-        dest: t.dest,
+        dest: t.destination,
         schema: 1 
     };
 
