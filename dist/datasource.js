@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 exports.GenericDatasource = undefined;
 
@@ -16,170 +16,227 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var GenericDatasource = exports.GenericDatasource = function () {
-  function GenericDatasource(instanceSettings, $q, backendSrv, templateSrv) {
-    _classCallCheck(this, GenericDatasource);
+    function GenericDatasource(instanceSettings, $q, backendSrv, templateSrv) {
+        _classCallCheck(this, GenericDatasource);
 
-    this.type = instanceSettings.type;
-    this.url = instanceSettings.url;
-    this.name = instanceSettings.name;
-    this.q = $q;
-    this.backendSrv = backendSrv;
-    this.templateSrv = templateSrv;
-    this.withCredentials = instanceSettings.withCredentials;
-    this.headers = { 'Content-Type': 'application/json' };
-    if (typeof instanceSettings.basicAuth === 'string' && instanceSettings.basicAuth.length > 0) {
-      this.headers['Authorization'] = instanceSettings.basicAuth;
-    }
-  }
-
-  _createClass(GenericDatasource, [{
-    key: 'query',
-    value: function query(options) {
-      var query = this.buildQueryParameters(options);
-      query.targets = query.targets.filter(function (t) {
-        return !t.hide;
-      });
-
-      if (query.targets.length <= 0) {
-        return this.q.when({ data: [] });
-      }
-
-      if (this.templateSrv.getAdhocFilters) {
-        query.adhocFilters = this.templateSrv.getAdhocFilters(this.name);
-      } else {
-        query.adhocFilters = [];
-      }
-
-      return this.doRequest({
-        url: this.url + '/query',
-        data: query,
-        method: 'POST'
-      });
-    }
-  }, {
-    key: 'testDatasource',
-    value: function testDatasource() {
-      return this.doRequest({
-        url: this.url + '/',
-        method: 'GET'
-      }).then(function (response) {
-        if (response.status === 200) {
-          return { status: "success", message: "Data source is working", title: "Success" };
+        this.url = instanceSettings.url;
+        this.name = instanceSettings.name;
+        this.q = $q;
+        this.backendSrv = backendSrv;
+        this.templateSrv = templateSrv;
+        this.withCredentials = instanceSettings.withCredentials;
+        this.headers = { 'Content-Type': 'application/json' };
+        if (typeof instanceSettings.basicAuth === 'string' && instanceSettings.basicAuth.length > 0) {
+            this.headers['Authorization'] = instanceSettings.basicAuth;
         }
-      });
     }
-  }, {
-    key: 'annotationQuery',
-    value: function annotationQuery(options) {
-      var query = this.templateSrv.replace(options.annotation.query, {}, 'glob');
-      var annotationQuery = {
-        range: options.range,
-        annotation: {
-          name: options.annotation.name,
-          datasource: options.annotation.datasource,
-          enable: options.annotation.enable,
-          iconColor: options.annotation.iconColor,
-          query: query
-        },
-        rangeRaw: options.rangeRaw
-      };
 
-      return this.doRequest({
-        url: this.url + '/annotations',
-        method: 'POST',
-        data: annotationQuery
-      }).then(function (result) {
-        return result.data;
-      });
-    }
-  }, {
-    key: 'metricFindQuery',
-    value: function metricFindQuery(query) {
-      var interpolated = {
-        target: this.templateSrv.replace(query, null, 'regex')
-      };
+    _createClass(GenericDatasource, [{
+        key: 'testDatasource',
+        value: function testDatasource() {
+            var url = this.url + '/json-proxy/connection-test';
+            var backend_request = {
+                withCredentials: this.withCredentials,
+                headers: this.headers,
+                url: url,
+                method: 'GET'
+            };
+            console.log('testDatasource: ' + JSON.stringify(backend_request));
 
-      return this.doRequest({
-        url: this.url + '/search',
-        data: interpolated,
-        method: 'POST'
-      }).then(this.mapToTextValue);
-    }
-  }, {
-    key: 'mapToTextValue',
-    value: function mapToTextValue(result) {
-      return _lodash2.default.map(result.data, function (d, i) {
-        if (d && d.text && d.value) {
-          return { text: d.text, value: d.value };
-        } else if (_lodash2.default.isObject(d)) {
-          return { text: d, value: i };
+            return this.backendSrv.datasourceRequest(backend_request).then(function (r) {
+                if (r.status === 200) {
+                    return {
+                        status: "success",
+                        message: "Data source is working",
+                        title: "Success"
+                    };
+                }
+            });
         }
-        return { text: d, value: d };
-      });
-    }
-  }, {
-    key: 'doRequest',
-    value: function doRequest(options) {
-      options.withCredentials = this.withCredentials;
-      options.headers = this.headers;
+    }, {
+        key: 'make_latency_test_params',
+        value: function make_latency_test_params(target) {
+            return {
+                'schema': 1,
+                'schedule': { 'slip': 'PT5M' },
+                'test': {
+                    'spec': target.test_spec,
+                    'type': target.test_type
+                }
+            };
+        }
+    }, {
+        key: 'delay',
+        value: function delay(t) {
+            return new Promise(function (res, rej) {
+                setTimeout(function () {
+                    res();
+                }, t);
+            });
+        }
+    }, {
+        key: 'loop_until_finished',
+        value: function loop_until_finished(status_url, ds) {
 
-      return this.backendSrv.datasourceRequest(options);
-    }
-  }, {
-    key: 'buildQueryParameters',
-    value: function buildQueryParameters(options) {
-      var _this = this;
+            console.log('getting status from ' + status_url);
 
-      //remove placeholder targets
-      options.targets = _lodash2.default.filter(options.targets, function (target) {
-        return target.target !== 'select metric';
-      });
+            var backend_request = {
+                withCredentials: ds.withCredentials,
+                headers: ds.headers,
+                url: ds.url + '/json-proxy/get',
+                method: 'POST',
+                data: { url: status_url + '/runs/first' }
+            };
 
-      var targets = _lodash2.default.map(options.targets, function (target) {
-        return {
-          target: _this.templateSrv.replace(target.target, options.scopedVars, 'regex'),
-          refId: target.refId,
-          hide: target.hide,
-          type: target.type || 'timeserie'
-        };
-      });
+            return ds.delay(5000).then(function () {
+                return ds.backendSrv.datasourceRequest(backend_request).then(function (r) {
+                    if (r.status !== 200) {
+                        return 'bad status: ' + r.status;
+                    }
 
-      options.targets = targets;
+                    console.log('got task state: ' + r.data.state);
+                    if (!_lodash2.default.includes(['pending', 'on-deck', 'running', 'finished'], r.data.state)) {
+                        console.log('unusual task state');
+                        return 'unhandled task state';
+                    }
 
-      return options;
-    }
-  }, {
-    key: 'getTagKeys',
-    value: function getTagKeys(options) {
-      var _this2 = this;
+                    if (r.data.state != 'finished') {
+                        return ds.loop_until_finished(status_url, ds);
+                    }
 
-      return new Promise(function (resolve, reject) {
-        _this2.doRequest({
-          url: _this2.url + '/tag-keys',
-          method: 'POST',
-          data: options
-        }).then(function (result) {
-          return resolve(result.data);
-        });
-      });
-    }
-  }, {
-    key: 'getTagValues',
-    value: function getTagValues(options) {
-      var _this3 = this;
+                    if (r.data.hasOwnProperty('result')) {
+                        console.log('response has "result"');
+                        return r.data.result;
+                    }
 
-      return new Promise(function (resolve, reject) {
-        _this3.doRequest({
-          url: _this3.url + '/tag-values',
-          method: 'POST',
-          data: options
-        }).then(function (result) {
-          return resolve(result.data);
-        });
-      });
-    }
-  }]);
+                    if (r.data.hasOwnProperty('result-merged')) {
+                        consoled.log('response has "result-merged"');
+                        return r.data['result-merged'];
+                    }
 
-  return GenericDatasource;
+                    console.log("can't find result key in response: " + JSON.stringify(r.data));
+                    return "can't find result key in response";
+                });
+            });
+        }
+    }, {
+        key: 'get_measurement_result',
+        value: function get_measurement_result(mp_hostname, task_data) {
+            var _this = this;
+
+            var payload = {
+                url: 'https://' + mp_hostname + '/pscheduler/tasks',
+                parameters: task_data
+            };
+
+            console.log('get_measurement_results: ' + JSON.stringify(task_data));
+
+            var backend_request = {
+                withCredentials: this.withCredentials,
+                headers: this.headers,
+                url: this.url + '/json-proxy/post',
+                method: 'POST',
+                data: payload
+            };
+
+            return this.backendSrv.datasourceRequest(backend_request).then(function (r) {
+                if (r.status === 200) {
+                    return _this.loop_until_finished(r.data, _this);
+                } else {
+                    console.log('error, got status: ' + r.status);
+                    return 'bad request';
+                }
+            });
+        }
+    }, {
+        key: 'query',
+        value: function query(options) {
+
+            var targets = options.targets.filter(function (t) {
+                return !t.hide;
+            });
+
+            if (targets === undefined || targets.length == 0) {
+                return new Promise(function (res, rej) {
+                    return res({
+                        _request: { data: test_parameters },
+                        data: []
+                    });
+                });
+            }
+
+            // just use the first target, as an experiement (for now only)
+
+            var test_parameters = this.make_latency_test_params(targets[0]);
+
+            var result_promise = this.get_measurement_result(targets[0].source, test_parameters);
+
+            return result_promise.then(function (r) {
+
+                var columns = [];
+                var rows = [];
+
+                if (test_parameters.test.type == 'latency') {
+                    columns = [{ text: 'src-ts', type: 'integer' }, { text: 'dst-ts', type: 'integer' }, { text: 'delta', type: 'integer' }];
+
+                    rows = _lodash2.default.map(r['raw-packets'], function (p) {
+                        return [p['src-ts'], p['dst-ts'], p['dst-ts'] - p['src-ts']];
+                    });
+                }
+
+                if (test_parameters.test.type == 'throughput') {
+                    columns = [{ text: 'start', type: 'number' }, { text: 'end', type: 'end' }, { text: 'retransmits', type: 'integer' }, { text: 'bytes', type: 'integer' }];
+
+                    rows = _lodash2.default.map(r['intervals'], function (p) {
+                        return [p.summary.start, p.summary.end, p.summary.retransmits, p.summary['throughput-bytes']];
+                    });
+                }
+
+                var data = {
+                    columns: columns,
+                    rows: rows,
+                    type: 'table'
+                };
+
+                console.log('data: ' + JSON.stringify(data));
+
+                return {
+                    _request: test_parameters,
+                    data: [data]
+                };
+            });
+        }
+    }, {
+        key: 'annotationQuery',
+        value: function annotationQuery(options) {
+            return [];
+        }
+    }, {
+        key: 'metricFindQuery',
+        value: function metricFindQuery(query) {
+            console.log('metricFindQuery: IS THIS METHOD EVER CALLED?');
+            /*
+                return Promise.resolve(
+                    [
+                        {text: 'm1', value: 'v1'},
+                        {text: 'm2', value: 'v2'}
+                    ]);
+            */
+
+            return [{ text: 'm1', value: 'v1' }, { text: 'm2', value: 'v2' }];
+        }
+    }, {
+        key: 'getTagKeys',
+        value: function getTagKeys(options) {
+            return [];
+        }
+    }, {
+        key: 'getTagValues',
+        value: function getTagValues(options) {
+            return [];
+        }
+    }]);
+
+    return GenericDatasource;
 }();
 //# sourceMappingURL=datasource.js.map
