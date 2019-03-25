@@ -133,6 +133,8 @@ export class GenericDatasource {
 
   query(options) {
 
+console.log('query(options): ' + JSON.stringify(options));
+
     var targets = options.targets.filter(t => !t.hide);
 
 
@@ -147,16 +149,21 @@ export class GenericDatasource {
 
     // just use the first target, as an experiement (for now only)
 
-    var test_parameters = this.make_latency_test_params(targets[0]);
+    var target = targets[0];
+    var test_parameters = this.make_latency_test_params(target);
+    var ds = this;
 
-    var result_promise = this.get_measurement_result(targets[0].source, test_parameters)
+    var result_promise = this.get_measurement_result(target.source, test_parameters)
 
     return result_promise.then(r => {
 
          var columns = [];
          var rows = [];
+
+console.log('target: ' + JSON.stringify(target));
+console.log('ds: ' + JSON.stringify(ds));
          
-         if (test_parameters.test.type == 'latency') {
+         if (target.test_type == 'latency') {
            columns = [
                {text: 'src-ts', type: 'integer'},
                {text: 'dst-ts', type: 'integer'},
@@ -172,7 +179,7 @@ export class GenericDatasource {
            });
          }
 
-         if (test_parameters.test.type == 'throughput') {
+         if (target.test_type == 'throughput') {
             columns = [
                {text: 'start', type: 'number'},
                {text: 'end', type: 'end'},
