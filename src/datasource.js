@@ -131,6 +131,53 @@ export class GenericDatasource {
     );
   }
 
+  make_latency_table(response) {
+    var columns = [
+        {text: 'src-ts', type: 'integer'},
+        {text: 'dst-ts', type: 'integer'},
+        {text: 'delta', type: 'integer'}
+    ];
+
+    var rows = _.map(response['raw-packets'], p => {
+        return [
+            p['src-ts'],
+            p['dst-ts'],
+            p['dst-ts']-p['src-ts']
+        ];
+    });
+ 
+     return {
+      columns: columns,
+      rows: rows,
+      type: 'table'
+    }
+  }
+
+  make_throughput_table(response) {
+    var columns = [
+       {text: 'start', type: 'number'},
+       {text: 'end', type: 'end'},
+       {text: 'retransmits', type: 'integer'},
+       {text: 'bytes', type: 'integer'}
+    ]
+    
+    var rows = _.map(response['intervals'], p => {
+        return [
+            p.summary.start,
+            p.summary.end,
+            p.summary.retransmits,
+            p.summary['throughput-bytes']
+        ];
+    });
+
+    return {
+      columns: columns,
+      rows: rows,
+      type: 'table'
+    }
+
+  }
+
   query(options) {
 
 console.log('query(options): ' + JSON.stringify(options));
@@ -157,52 +204,19 @@ console.log('query(options): ' + JSON.stringify(options));
 
     return result_promise.then(r => {
 
-         var columns = [];
-         var rows = [];
+         var data = null;
 
 console.log('target: ' + JSON.stringify(target));
 console.log('ds: ' + JSON.stringify(ds));
          
          if (target.test_type == 'latency') {
-           columns = [
-               {text: 'src-ts', type: 'integer'},
-               {text: 'dst-ts', type: 'integer'},
-               {text: 'delta', type: 'integer'}
-           ];
-  
-           rows = _.map(r['raw-packets'], p => {
-               return [
-                   p['src-ts'],
-                   p['dst-ts'],
-                   p['dst-ts']-p['src-ts']
-               ];
-           });
+            data = ds.make_latency_table(r);
          }
 
          if (target.test_type == 'throughput') {
-            columns = [
-               {text: 'start', type: 'number'},
-               {text: 'end', type: 'end'},
-               {text: 'retransmits', type: 'integer'},
-               {text: 'bytes', type: 'integer'}
-            ]
+            data = ds.make_throughput_table(r);
+         }
             
-            rows = _.map(r['intervals'], p => {
-                return [
-                    p.summary.start,
-                    p.summary.end,
-                    p.summary.retransmits,
-                    p.summary['throughput-bytes']
-                ];
-            });
-         }
-
-         var data = {
-             columns: columns,
-             rows: rows,
-             type: 'table'
-         }
-
          console.log('data: ' + JSON.stringify(data));
          
          return {
