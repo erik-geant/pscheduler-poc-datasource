@@ -3,13 +3,22 @@ import Q from "q";
 
 describe('GenericDatasource', function() {
     var ctx = {};
-/*
     beforeEach(function() {
         ctx.$q = Q;
         ctx.backendSrv = {};
         ctx.templateSrv = {};
         ctx.ds = new Datasource({}, ctx.$q, ctx.backendSrv, ctx.templateSrv);
     });
+
+    it('should correctly convert from owamp to epoch timestamps', function(done) {
+        expect(
+            ctx.ds.owpingts2epoch(16160149440624990000)
+        ).to.equal(1553589195.803);
+        done();
+    });
+
+
+/*
 
     it('should return an empty array when no targets are set', function(done) {
         ctx.ds.query({targets: []}).then(function(result) {
