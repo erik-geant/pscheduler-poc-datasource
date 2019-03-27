@@ -28,6 +28,7 @@ var GenericDatasourceQueryCtrl = exports.GenericDatasourceQueryCtrl = function (
         _this.scope = $scope;
 
         // general test params
+        var default_panel_type = 'timeseries';
         var default_test_type = 'latency';
         var default_source = 'psmall-b-3.basnet.by';
         var default_destination = 'psmall-b-2.basnet.by';
@@ -41,6 +42,7 @@ var GenericDatasourceQueryCtrl = exports.GenericDatasourceQueryCtrl = function (
         // iperf3 params
         var default_duration = 'PT10S';
 
+        _this.target.panel_type = _this.target.panel_type || default_panel_type;
         _this.target.source = _this.target.source || default_source;
         _this.target.destination = _this.target.destination || default_destination;
         _this.target.test_type = _this.target.test_type || default_test_type;
@@ -110,6 +112,10 @@ var GenericDatasourceQueryCtrl = exports.GenericDatasourceQueryCtrl = function (
 
             if (option_name == 'test-type') {
                 $options = [{ text: 'latency', value: 'latency' }, { text: 'throughput', value: 'throughput' }];
+            }
+
+            if (option_name == 'panel-type') {
+                $options = [{ text: 'timeseries', value: 'timeseries' }, { text: 'table', value: 'table' }];
             }
 
             return $options;

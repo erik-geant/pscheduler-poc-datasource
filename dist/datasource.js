@@ -267,7 +267,7 @@ var GenericDatasource = exports.GenericDatasource = function () {
         //console.log('result: ' + JSON.stringify(r));
 
         if (target.test_type == 'latency') {
-          if (target.type == 'table') {
+          if (target.panel_type == 'table') {
             data = ds.make_latency_table(r);
           } else {
             data = {
@@ -278,7 +278,7 @@ var GenericDatasource = exports.GenericDatasource = function () {
         }
 
         if (target.test_type == 'throughput') {
-          if (target.type == 'table') {
+          if (target.panel_type == 'table') {
             data = ds.make_throughput_table(r);
           } else {
             data = {
