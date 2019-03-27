@@ -4,6 +4,17 @@
     has-text-edit-mode="true">
   <div class="gf-form-inline">
 
+    <div class="section gf-form-group">
+      <div class="gf-form">
+        <label class="gf-form-label">panel type</label>
+        <gf-form-dropdown model="ctrl.target.panel_type"
+          allow-custom="false"
+          lookup-text="false"
+          get-options="ctrl.getOptions('', 'panel-type')"
+          on-change="ctrl.onChangeInternal()">
+        </gf-form-dropdown>
+      </div>
+    </div>
 
     <div class="section gf-form-group">
       <div class="gf-form">

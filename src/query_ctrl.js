@@ -9,7 +9,8 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
     this.scope = $scope;
 
     // general test params
-    var default_test_type = 'latency'
+    var default_panel_type = 'timeseries';
+    var default_test_type = 'latency';
     var default_source = 'psmall-b-3.basnet.by';
     var default_destination = 'psmall-b-2.basnet.by';
     var default_ip_version = 4;
@@ -22,6 +23,8 @@ export class GenericDatasourceQueryCtrl extends QueryCtrl {
     // iperf3 params
     var default_duration = 'PT10S';
 
+    this.target.panel_type =
+        this.target.panel_type || default_panel_type;
     this.target.source =
         this.target.source || default_source;
     this.target.destination =
@@ -124,7 +127,12 @@ console.log('test_spec: ' + JSON.stringify(_test_spec));
         ];
     }
 
-
+    if (option_name == 'panel-type') {
+        $options = [
+            {text: 'timeseries', value: 'timeseries'},
+            {text: 'table', value: 'table'}
+        ];
+    }
 
     return $options;
 
