@@ -210,12 +210,24 @@ export class GenericDatasource {
       rows: rows,
       type: 'table'
     }
-
   }
+
+  make_throughput_timeseries(response) {
+    var times = _.map(response.intervals, p => { return p.summary.end; });
+    var max_ts = _.max(times);
+    var now = new Date().getTime();
+    return _.map(response.intervals, p => {
+        return [
+            p.summary['throughput-bytes'],
+            now - (p.summary.end - max_ts) * 1000
+        ];
+    });
+  }
+
 
   query(options) {
 
-console.log('query(options): ' + JSON.stringify(options));
+//console.log('query(options): ' + JSON.stringify(options));
 
     var targets = options.targets.filter(t => !t.hide);
 
@@ -241,9 +253,9 @@ console.log('query(options): ' + JSON.stringify(options));
 
          var data = null;
 
-console.log('target: ' + JSON.stringify(target));
-console.log('ds: ' + JSON.stringify(ds));
-console.log('result: ' + JSON.stringify(r));
+//console.log('target: ' + JSON.stringify(target));
+//console.log('ds: ' + JSON.stringify(ds));
+//console.log('result: ' + JSON.stringify(r));
          
          if (target.test_type == 'latency') {
             if (target.type == 'table') {
@@ -259,6 +271,11 @@ console.log('result: ' + JSON.stringify(r));
          if (target.test_type == 'throughput') {
             if (target.type == 'table') {
               data = ds.make_throughput_table(r);
+            } else {
+              data = {
+                target: target.refId,
+                datapoints: ds.make_throughput_timeseries(r)
+              }
             }
          }
             
