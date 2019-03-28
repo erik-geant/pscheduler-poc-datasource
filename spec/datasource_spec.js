@@ -11,9 +11,8 @@ describe('GenericDatasource', function() {
     });
 
     it('should correctly convert from owamp to epoch timestamps', function(done) {
-        expect(
-            ctx.ds.owpingts2epoch(16160149440624990000)
-        ).to.equal(1553589195.803);
+        var ts_ms = ctx.ds.owpingts2epoch_ms(16160149440624990000);
+        expect(Math.floor(ts_ms)).to.equal(1553589195803);
         done();
     });
 
