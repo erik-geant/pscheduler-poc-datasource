@@ -165,12 +165,12 @@ var GenericDatasource = exports.GenericDatasource = function () {
       return epoch_ts_with_ms;
     }
   }, {
-    key: 'owpingts2epoch',
-    value: function owpingts2epoch(owpts) {
+    key: 'owpingts2epoch_ms',
+    value: function owpingts2epoch_ms(owpts) {
       var OWPJAN_1970 = 0x83aa7e80;
       var upper_32 = owpts / Math.pow(2, 32);
       var epoch_seconds = upper_32 - OWPJAN_1970;
-      return Math.floor(epoch_seconds * 1000) / 1000;
+      return epoch_seconds * 1000;
     }
   }, {
     key: 'make_latency_table',
@@ -180,10 +180,11 @@ var GenericDatasource = exports.GenericDatasource = function () {
       var columns = [{ text: 'src-ts', type: 'time' }, { text: 'dst-ts', type: 'time' }, { text: 'delta', type: 'number' }];
 
       var rows = _lodash2.default.map(response['raw-packets'], function (p) {
-        var src_ts = _this2.owpingts2epoch(p['src-ts']);
-        var dst_ts = _this2.owpingts2epoch(p['dst-ts']);
-        var delta = (p['dst-ts'] - p['src-ts']) / Math.pow(2, 32);
-        return [new Date(src_ts), new Date(dst_ts), Math.floor(delta * 1000000) / 1000];
+        var src_ts = _this2.owpingts2epoch_ms(p['src-ts']);
+        var dst_ts = _this2.owpingts2epoch_ms(p['dst-ts']);
+        return [src_ts, dst_ts,
+        // TODO: don't understand something here ...
+        Math.abs(dst_ts - src_ts)];
       });
 
       return {
@@ -198,10 +199,9 @@ var GenericDatasource = exports.GenericDatasource = function () {
       var _this3 = this;
 
       return _lodash2.default.map(response['raw-packets'], function (p) {
-        var src_ts = _this3.owpingts2epoch(p['src-ts']);
-        var dst_ts = _this3.owpingts2epoch(p['dst-ts']);
-        var delta = (p['dst-ts'] - p['src-ts']) / Math.pow(2, 32);
-        return [Math.floor(delta * 1000000) / 1000, src_ts * 1000];
+        var src_ts = _this3.owpingts2epoch_ms(p['src-ts']);
+        var dst_ts = _this3.owpingts2epoch_ms(p['dst-ts']);
+        return [Math.abs(dst_ts - src_ts), src_ts];
       });
     }
   }, {
