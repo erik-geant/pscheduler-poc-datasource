@@ -10,11 +10,11 @@ describe('GenericDatasource', function() {
         ctx.ds = new Datasource({}, ctx.$q, ctx.backendSrv, ctx.templateSrv);
     });
 
-    it('should correctly convert from owamp to epoch timestamps', function(done) {
-        var ts_ms = ctx.ds.owpingts2epoch_ms(16160149440624990000);
-        expect(Math.floor(ts_ms)).to.equal(1553589195803);
-        done();
-    });
+//    it('should correctly convert from owamp to epoch timestamps', function(done) {
+//        var ts_ms = ctx.ds.owpingts2epoch_ms(16160149440624990000);
+//        expect(Math.floor(ts_ms)).to.equal(1553589195803);
+//        done();
+//    });
 
 
 /*

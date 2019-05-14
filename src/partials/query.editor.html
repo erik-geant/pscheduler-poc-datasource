@@ -2,163 +2,26 @@
     query-ctrl="ctrl"
     class="generic-datasource-query-row"
     has-text-edit-mode="true">
-  <div class="gf-form-inline">
 
     <div class="section gf-form-group">
       <div class="gf-form">
-        <label class="gf-form-label">panel type</label>
-        <gf-form-dropdown model="ctrl.target.panel_type"
-          allow-custom="false"
-          lookup-text="false"
-          get-options="ctrl.getOptions('', 'panel-type')"
-          on-change="ctrl.onChangeInternal()">
-        </gf-form-dropdown>
+        <label class="gf-form-label">measurement point</label>
+        <input
+            type="text"
+            class="gf-form-input"
+            ng-model="ctrl.target.mp"
+            on-blur="ctrl.onChangeInternal()" />
       </div>
-    </div>
-
-    <div class="section gf-form-group">
-      <div class="gf-form">
-        <label class="gf-form-label">measurement type</label>
-        <gf-form-dropdown model="ctrl.target.test_type"
-          allow-custom="true"
-          lookup-text="false"
-          get-options="ctrl.getOptions('', 'test-type')"
-          on-change="ctrl.onChangeInternal()">
-        </gf-form-dropdown>
-      </div>
-    </div>
-
-    <div class="section gf-form-group">
 
       <div class="gf-form">
-        <label class="gf-form-label">source</label>
-        <gf-form-dropdown model="ctrl.target.source"
-          allow-custom="true"
-          lookup-text="false"
-          get-options="ctrl.getOptions('', 'source')"
-          on-change="ctrl.onChangeInternal()">
-        </gf-form-dropdown>
-      </div>
-
-       <div class="gf-form">
-        <label class="gf-form-label">destination</label>
-        <gf-form-dropdown model="ctrl.target.destination"
-          allow-custom="true"
-          lookup-text="false"
-          get-options="ctrl.getOptions('', 'destination')"
-          on-change="ctrl.onChangeInternal()">
-        </gf-form-dropdown>
-      </div>
- 
-    </div>
-
-
-
-
-
-    <div ng-if="ctrl.target.test_type == 'latency'">
-      <div class="section gf-form-group">
-
-        <div class="gf-form">
-          <label class="gf-form-label">packet count</label>
-          <gf-form-dropdown model="ctrl.target.packet_count"
-            allow-custom="true"
-            lookup-text="false"
-            get-options="ctrl.getOptions('latency', 'packet-count')"
-            on-change="ctrl.onChangeInternal()">
-          </gf-form-dropdown>
-        </div>
-  
-        <div class="gf-form">
-          <label class="gf-form-label">packet interval</label>
-          <gf-form-dropdown model="ctrl.target.packet_interval"
-            allow-custom="true"
-            lookup-text="false"
-            get-options="ctrl.getOptions('latency', 'packet-interval')"
-            on-change="ctrl.onChangeInternal()">
-          </gf-form-dropdown>
-        </div>
-        
-        <div class="gf-form">
-          <label class="gf-form-label">packet timeout</label>
-          <gf-form-dropdown model="ctrl.target.packet_timeout"
-            allow-custom="true"
-            lookup-text="false"
-            get-options="ctrl.getOptions('latency', 'packet-timeout')"
-            on-change="ctrl.onChangeInternal()">
-          </gf-form-dropdown>
-        </div>
-        
-        <div class="gf-form">
-          <label class="gf-form-label">ip version</label>
-          <gf-form-dropdown model="ctrl.target.ip_version"
-            allow-custom="false"
-            lookup-text="false"
-            get-options="ctrl.getOptions('latency', 'ip-version')"
-            on-change="ctrl.onChangeInternal()">
-          </gf-form-dropdown>
-        </div>
-
+        <label class="gf-form-label">task id</label>
+        <input
+            type="text"
+            class="gf-form-input"
+            ng-model="ctrl.target.task"
+            on-blur="ctrl.onChangeInternal()" />
       </div>
     </div>
-
-
-    <div ng-if="ctrl.target.test_type == 'throughput'">
-      <div class="section gf-form-group">
- 
-        <div class="gf-form">
-          <label class="gf-form-label">duration</label>
-          <gf-form-dropdown model="ctrl.target.duration"
-            allow-custom="true"
-            lookup-text="false"
-            get-options="ctrl.getOptions('throughput', 'duration')"
-            on-change="ctrl.onChangeInternal()">
-          </gf-form-dropdown>
-        </div>
-
-        <div class="gf-form">
-          <label class="gf-form-label">ip version</label>
-          <gf-form-dropdown model="ctrl.target.ip_version"
-            allow-custom="false"
-            lookup-text="false"
-            get-options="ctrl.getOptions('throughput', 'ip-version')"
-            on-change="ctrl.onChangeInternal()">
-          </gf-form-dropdown>
-        </div>
-
-      </div> 
-    </div>
-<!--
-
-    # throughput params
-    "duration": "",
-    "interval": "",
-    "tos": "",
-    "protocol": "",
-    "address_type": "",
-    "tcp_window": "",
-    "udp_buffer": "",
-    "max_bandwidth": "",
-
-<div class="gf-form max-width-8"
-<select class="gf-form-input" ng-model="ctrl.target.type" ng-options="f as f for f in ['table', 'timeserie']"></select>
-</div>
-
-<div class="gf-form" ng-if="ctrl.target.rawQuery">
-<textarea class="gf-form-input" rows="5" ng-model="ctrl.target.target" spellcheck="false" ng-blur="ctrl.onChangeInternal()" />
-</div>
-
-<div ng-if="!ctrl.target.rawQuery">
-<div class="gf-form">
-<gf-form-dropdown model="ctrl.target.target"
-allow-custom="true"
-lookup-text="true"
-get-options="ctrl.getOptions($query)"
-on-change="ctrl.onChangeInternal()">
-</gf-form-dropdown>
-</div>
-</div>
--->
 
     <div class="gf-form gf-form--grow">
       <div class="gf-form-label gf-form-label--grow"></div>
